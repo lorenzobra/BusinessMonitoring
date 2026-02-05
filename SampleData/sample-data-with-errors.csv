@@ -1,0 +1,11 @@
+customer_id,service_type,activation_date,expiration_date,amount,status
+CUST100,hosting,2023-01-15,2028-01-15,199.99,active
+CUST101,invalid_type,2023-02-01,2028-02-01,49.99,active
+CUST102,pec,2025-12-31,2028-12-31,49.99,active
+CUST103,hosting,2023-04-10,2023-03-10,299.99,active
+CUST104,spid,2023-05-15,2028-05-15,-50.00,active
+CUST105,fatturazione,2023-06-01,2028-06-01,89.99,invalid_status
+,pec,2023-07-01,2028-07-01,49.99,active
+CUST107,hosting,invalid_date,2028-08-15,299.99,active
+CUST108,spid,2023-09-01,2028-09-01,999999999.99,active
+CUST109,hosting,2023-10-15,2028-10-15,199.99,active
