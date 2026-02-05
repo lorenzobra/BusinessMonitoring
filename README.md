@@ -76,6 +76,11 @@ Nel repo nella cartella SampleData sono disponibili 2 file csv di esempio
 
 Tramite l'endpoint POST api/csv/upload è possibile caricare il file che verrà elaborato dal sistema.
 
+### 4. Monitorare l'elaborazione
+
+Dopo aver caricato un file, tramite la dashboard di Aspire è possibile visualizzare i log strutturati delle applicazioni.
+
+
 
 # Flusso di Elaborazione CSV
 
