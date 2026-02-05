@@ -39,6 +39,43 @@ Il progetto è composto da:
  
     L'API con cui autenticarsi, caricare il csv e richiedere i report, sarà disponibile all'indirizzo mostrato nel dashboard Aspire (https://localhost:7052/swagger)
 
+## 🔐 Test delle API
+
+Questa sezione descrive i passaggi necessari per autenticarsi e testare gli endpoint esposti dal servizio.
+
+### 1. Effettuare il login
+
+Per prima cosa è necessario ottenere un token JWT tramite l’endpoint di autenticazione.
+
+**Endpoint:** `POST /api/Auth/login`  
+**Credenziali di test:**
+
+```json
+{
+  "username": "admin",
+  "password": "admin"
+}
+```
+La risposta conterrà un token JWT nel campo token.
+
+### 2. Autorizzarsi in Swagger
+
+Una volta ottenuto il token:
+1.  Cliccare sul pulsante Authorize in alto a destra.
+2.  Inserire il token nel formato:
+```
+bearer {token}
+```
+3.  Confermare con Authorize
+
+Da questo momento tutte le chiamate agli endpoint protetti verranno eseguite con il token JWT.
+
+### 3. Caricare un CSV
+
+Nel repo nella cartella SampleData sono disponibili 2 file csv di esempio 
+
+Tramite l'endpoint POST api/csv/upload è possibile caricare il file che verrà elaborato dal sistema.
+
 ## Servizi Esterni
 
 Durante l'avvio, verranno automaticamente creati e configurati i seguenti container Docker:
