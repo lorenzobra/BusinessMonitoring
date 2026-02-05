@@ -32,9 +32,11 @@ Il progetto è composto da:
    dotnet run --project BusinessMonitoring.AppHost
 ```
 4. **Accedi alla Dashboard Aspire**
+ 
    Dopo l'avvio la console mostrerà l'indirizzo a cui trovare la dashboard di aspire.
    
 6. **Accedi all'API**
+ 
     L'API con cui autenticarsi, caricare il csv e richiedere i report, sarà disponibile all'indirizzo mostrato nel dashboard Aspire (https://localhost:7052/swagger)
 
 ## Servizi Esterni
