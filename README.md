@@ -76,6 +76,104 @@ Nel repo nella cartella SampleData sono disponibili 2 file csv di esempio
 
 Tramite l'endpoint POST api/csv/upload è possibile caricare il file che verrà elaborato dal sistema.
 
+
+# Flusso di Elaborazione CSV
+
+## 1. Upload File
+**Endpoint:** `POST /api/csv/upload`
+
+L'utente carica un file CSV tramite API. Il controller:
+- Valida il file (formato .csv, max 10MB)
+- Salva il file su filesystem
+- Crea record in `UploadHistory` (stato: `Pending`)
+- Pubblica evento `CsvUploadedEvent`
+- Risponde immediatamente al client con `uploadId`
+
+**Evento generato:** `CsvUploadedEvent`
+```json
+{
+  "fileName": "abc123_data.csv",
+  "filePath": "/uploads/abc123_data.csv",
+  "uploadedBy": "user@example.com"
+}
+```
+
+---
+
+## 2. Elaborazione Asincrona
+**Consumer:** `CsvUploadedConsumer`
+
+Il worker riceve l'evento e avvia l'elaborazione:
+- Aggiorna `UploadHistory` (stato: `Processing`)
+- Legge il file da filesystem
+- Parsing del CSV con `CsvHelper`
+- Validazione righe con `FluentValidation`
+- Separa righe valide da quelle invalide
+
+---
+
+## 3. Salvataggio Risultati
+
+Il consumer persiste i dati elaborati:
+- **Righe valide** → Upsert in tabella `Services`
+- **Righe invalide** → Log in tabella `ProcessingErrors`
+- Aggiorna `UploadHistory` (stato: `Completed`, contatori righe)
+
+---
+
+## 4. Notifica Completamento
+**Evento generato:** `CsvImportCompletedEvent`
+
+Il consumer pubblica l'evento di completamento:
+```json
+{
+  "batchId": "def456",
+  "fileName": "abc123_data.csv",
+  "totalRows": 1000,
+  "validRows": 980,
+  "invalidRows": 20,
+  "success": true
+}
+```
+
+**Consumer che reagiscono all'evento:**
+
+### `UpsellOpportunityConsumer`
+Identifica opportunità di upselling analizzando servizi attivi da oltre 3 anni:
+- Interroga il database per servizi longevi
+- Invia email al team marketing con lista clienti
+- Pubblica eventi `UpsellOpportunityDetectedEvent` per tracking analytics
+
+### `ExpiredServicesConsumer`
+Monitora clienti con molti servizi scaduti (soglia: 5+):
+- Identifica clienti a rischio churn
+- Pubblica alert `CustomerExpiredServicesAlert` per sistemi esterni
+- Notifiche utilizzabili da CRM o sistemi di retention
+
+## Eventi del Sistema
+
+### `CsvUploadedEvent`
+- **Publisher:** `CsvController` (API)
+- **Consumer:** `CsvUploadedConsumer` (Worker)
+- **Scopo:** Avviare elaborazione asincrona del file
+
+### `CsvImportCompletedEvent`
+- **Publisher:** `CsvUploadedConsumer` (Worker)
+- **Consumer:** `UpsellOpportunityConsumer`, `ExpiredServicesConsumer`
+- **Scopo:** Notificare completamento e triggerare analisi business
+
+### `UpsellOpportunityDetectedEvent`
+- **Publisher:** `UpsellOpportunityConsumer` (Worker)
+- **Consumer:** Sistemi di analytics/tracking (esterni)
+- **Scopo:** Tracciare singole opportunità di upselling
+
+### `CustomerExpiredServicesAlert`
+- **Publisher:** `ExpiredServicesConsumer` (Worker)
+- **Consumer:** CRM, sistemi di retention (esterni)
+- **Scopo:** Alerting clienti a rischio churn
+- **Routing:** Configurato con `[EntityName("alerts.customer_expired")]` per instradamento dedicato
+
+
 ## Servizi Esterni
 
 Durante l'avvio, verranno automaticamente creati e configurati i seguenti container Docker:
